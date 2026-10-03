@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#050506">
+<title>MEME//TRACKER</title>
+<meta name="description" content="Curated meme tracker — real on-chain data from DexScreener.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --bg:#050506;
+  --card:#0b0b0d;
+  --line:#17171a;
+  --line-2:#232329;
+  --fg:#f4f4f5;
+  --fg-2:#a1a1aa;
+  --muted:#6b6b75;
+  --dim:#3a3a42;
+
+  --green:#3fe081;
+  --green-soft:rgba(63,224,129,.09);
+  --green-line:rgba(63,224,129,.38);
+  --red:#f87171;
+  --red-soft:rgba(248,113,113,.09);
+
+  --r:28px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+}
+button{font-family:inherit}
+img{display:block}
+
+/* subtle ambient gradients */
+.bg-glow{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(900px 620px at 12% -12%, rgba(63,224,129,.055), transparent 62%),
+    radial-gradient(700px 520px at 102% -4%, rgba(255,255,255,.028), transparent 62%),
+    radial-gradient(900px 700px at 50% 118%, rgba(63,224,129,.028), transparent 65%);
+}
+
+.wrap{
+  width:100%;
+  max-width:1200px;
+  margin:0 auto;
+  padding:0 18px;
+  position:relative;
+  z-index:1;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header{
+  position:sticky; top:0; z-index:60;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(5,5,6,.94), rgba(5,5,6,.76));
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+}
+.header__inner{
+  height:62px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+}
+.brand{
+  font:900 14.5px/1 'Inter',sans-serif;
+  letter-spacing:-.015em;
+  color:var(--fg);
+  text-decoration:none;
+  display:inline-flex; align-items:center;
+}
+.brand span{color:var(--green); margin:0 1px; font-weight:900}
+
+.live{
+  display:inline-flex; align-items:center; gap:7px;
+  font:700 9.5px/1 'JetBrains Mono',monospace;
+  letter-spacing:.16em; color:var(--muted);
+}
+.live .dot{
+  width:6px; height:6px; border-radius:50%;
+  background:var(--green);
+  animation:pulse 2.4s infinite;
+}
+.live.off .dot{background:var(--dim); animation:none; box-shadow:none}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(63,224,129,.55)}
+  70%{box-shadow:0 0 0 7px rgba(63,224,129,0)}
+  100%{box-shadow:0 0 0 0 rgba(63,224,129,0)}
+}
+
+/* ============================================================
+   FILTERS
+   ============================================================ */
+.filters{
+  display:flex; gap:8px;
+  overflow-x:auto;
+  padding:16px 0 20px;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.filters::-webkit-scrollbar{display:none}
+
+.pill{
+  flex:0 0 auto;
+  display:inline-flex; align-items:center; gap:7px;
+  padding:10px 15px;
+  border-radius:999px;
+  border:1px solid var(--line-2);
+  background:rgba(255,255,255,.02);
+  color:var(--fg-2);
+  font:600 12.5px/1 'Inter',sans-serif;
+  letter-spacing:.01em;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:color .18s var(--ease), background .18s var(--ease),
+             border-color .18s var(--ease), box-shadow .18s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+}
+.pill:hover{color:var(--fg); border-color:#2e2e35; background:rgba(255,255,255,.045)}
+.pill[aria-selected="true"]{
+  color:var(--green);
+  border-color:var(--green-line);
+  background:var(--green-soft);
+  box-shadow:0 8px 26px -14px rgba(63,224,129,.65);
+}
+
+/* ============================================================
+   FEED GRID
+   ============================================================ */
+.feed{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:20px;
+}
+@media (min-width:880px){
+  .feed{grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px}
+}
+
+/* ============================================================
+   CARD
+   ============================================================ */
+.card{
+  position:relative;
+  aspect-ratio:1 / 1;
+  border-radius:var(--r);
+  overflow:hidden;
+  background:var(--card);
+  border:1px solid var(--line);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 30px 70px -50px rgba(0,0,0,.95);
+  isolation:isolate;
+  transition:transform .4s var(--ease), border-color .4s var(--ease);
+}
+@media (hover:hover){
+  .card:hover{transform:translateY(-3px); border-color:#26262c}
+  .card:hover .card__img{transform:scale(1.055)}
+}
+
+.card__img{
+  position:absolute; inset:0; z-index:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  background:#0e0e10;
+  transform:scale(1.01);
+  transition:transform .7s var(--ease);
+}
+
+.card__scrim{
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(180deg,
+    rgba(5,5,6,.74) 0%,
+    rgba(5,5,6,.18) 24%,
+    rgba(5,5,6,0) 40%,
+    rgba(5,5,6,.42) 58%,
+    rgba(5,5,6,.88) 78%,
+    rgba(5,5,6,.97) 100%);
+}
+
+.card__top{
+  position:absolute; top:14px; left:14px; right:14px; z-index:2;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:8px;
+}
+
+.badge{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 10px;
+  border-radius:999px;
+  font:800 10px/1 'Inter',sans-serif;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  color:#fff;
+  background:rgba(5,5,6,.62);
+  border:1px solid rgba(255,255,255,.13);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+}
+.badge--featured{color:#fff; border-color:rgba(255,255,255,.34); background:rgba(5,5,6,.72)}
+.badge--trending{color:var(--green); border-color:var(--green-line); background:rgba(5,22,13,.62)}
+.badge--rising  {color:var(--green); border-color:var(--green-line); background:rgba(5,22,13,.62)}
+.badge--new     {color:var(--fg-2); border-color:rgba(255,255,255,.2)}
+
+.chip{
+  flex:0 0 auto;
+  padding:7px 9px;
+  border-radius:999px;
+  font:700 9px/1 'JetBrains Mono',monospace;
+  letter-spacing:.12em;
+  color:var(--fg-2);
+  background:rgba(5,5,6,.62);
+  border:1px solid rgba(255,255,255,.1);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+}
+
+.card__body{
+  position:absolute; left:0; right:0; bottom:0; z-index:2;
+  padding:16px 16px 15px;
+}
+
+.card__title{display:flex; align-items:baseline; gap:8px; min-width:0}
+.card__name{
+  margin:0;
+  font:800 19px/1.15 'Inter',sans-serif;
+  letter-spacing:-.022em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.card__ticker{
+  flex:0 0 auto;
+  font:500 12px/1 'JetBrains Mono',monospace;
+  color:var(--fg-2);
+}
+
+.card__price{display:flex; align-items:center; gap:9px; margin-top:8px}
+.price{
+  font:700 20px/1 'JetBrains Mono',monospace;
+  letter-spacing:-.02em;
+}
+.chg{
+  font:700 11px/1 'JetBrains Mono',monospace;
+  padding:5px 7px;
+  border-radius:8px;
+  letter-spacing:-.01em;
+}
+.chg.up  {color:var(--green); background:var(--green-soft)}
+.chg.down{color:var(--red);   background:var(--red-soft)}
+.chg.flat{color:var(--muted); background:rgba(255,255,255,.05)}
+
+.card__stats{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:11px 12px;
+  margin-top:13px;
+  padding-top:13px;
+  border-top:1px solid rgba(255,255,255,.07);
+}
+@media (min-width:880px){
+  .card__stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+.stat{min-width:0}
+.stat__k{
+  font:600 9px/1 'Inter',sans-serif;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.stat__v{
+  margin-top:5px;
+  font:500 12.5px/1 'JetBrains Mono',monospace;
+  color:var(--fg);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+.card__meta{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  margin-top:12px;
+  font:400 9.5px/1 'JetBrains Mono',monospace;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.pair{
+  background:none; border:0; padding:0;
+  color:var(--muted);
+  font:inherit; letter-spacing:inherit; text-transform:inherit;
+  cursor:pointer;
+  transition:color .18s var(--ease);
+}
+.pair:hover{color:var(--fg)}
+
+.card__actions{display:flex; gap:7px; margin-top:13px}
+.act{
+  flex:1 1 0; min-width:0;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  height:36px;
+  padding:0 8px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.035);
+  color:var(--fg-2);
+  font:600 11.5px/1 'Inter',sans-serif;
+  text-decoration:none;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:color .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+}
+.act:hover{color:var(--fg); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.2)}
+.act.on{color:var(--green); background:var(--green-soft); border-color:var(--green-line)}
+.act--watch.on{color:#fff; background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.34)}
+
+/* ============================================================
+   SKELETONS / STATES / SENTINEL
+   ============================================================ */
+.sk{
+  aspect-ratio:1/1;
+  border-radius:var(--r);
+  border:1px solid var(--line);
+  background:linear-gradient(100deg,#0a0a0c 28%,#131316 50%,#0a0a0c 72%);
+  background-size:220% 100%;
+  animation:shimmer 1.5s linear infinite;
+}
+@keyframes shimmer{to{background-position:-220% 0}}
+
+.state{
+  grid-column:1 / -1;
+  padding:80px 20px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
+.state strong{
+  display:block;
+  margin-bottom:8px;
+  color:var(--fg);
+  font:800 15px/1.3 'Inter',sans-serif;
+  letter-spacing:-.01em;
+}
+.state code{
+  display:inline-block;
+  margin-top:12px;
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid var(--line-2);
+  background:rgba(255,255,255,.03);
+  font:500 11px/1.5 'JetBrains Mono',monospace;
+  color:var(--fg-2);
+}
+
+.sentinel{
+  display:flex; align-items:center; justify-content:center;
+  min-height:64px;
+  padding:22px 0 64px;
+}
+.spinner{
+  width:20px; height:20px;
+  border-radius:50%;
+  border:2px solid var(--line-2);
+  border-top-color:var(--green);
+  opacity:0;
+  transition:opacity .2s var(--ease);
+  animation:spin .7s linear infinite;
+}
+.spinner.on{opacity:1}
+@keyframes spin{to{transform:rotate(360deg)}}
+.end{
+  font:600 9.5px/1 'JetBrains Mono',monospace;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--dim);
+}
+
+/* ============================================================
+   FOOTER / TOAST
+   ============================================================ */
+footer{
+  padding:8px 18px 56px;
+  text-align:center;
+  font:400 9.5px/1.8 'JetBrains Mono',monospace;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--dim);
+}
+
+.toast{
+  position:fixed; left:50%; bottom:26px; z-index:200;
+  transform:translate(-50%,16px);
+  padding:11px 16px;
+  border-radius:14px;
+  background:#101013;
+  border:1px solid var(--line-2);
+  color:var(--fg);
+  font:600 12.5px/1 'Inter',sans-serif;
+  box-shadow:0 24px 60px -30px #000;
+  opacity:0; pointer-events:none;
+  transition:opacity .25s var(--ease), transform .25s var(--ease);
+  max-width:calc(100vw - 32px);
+}
+.toast.show{opacity:1; transform:translate(-50%,0)}
+
+/* ============================================================
+   MOTION PREFERENCES
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important; transition-duration:.001ms !important}
+  .card:hover{transform:none}
+  .card:hover .card__img{transform:scale(1.01)}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow" aria-hidden="true"></div>
+
+<header class="header">
+  <div class="wrap header__inner">
+    <a class="brand" href="./">MEME<span>//</span>TRACKER</a>
+    <div class="live" id="live"><span class="dot"></span><span id="liveText">LIVE</span></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="filters" role="tablist" aria-label="Feed filters">
+    <button class="pill" role="tab" data-sort="trending"  aria-selected="true">🔥 Trending</button>
+    <button class="pill" role="tab" data-sort="new"       aria-selected="false">🆕 New</button>
+    <button class="pill" role="tab" data-sort="rising"    aria-selected="false">📈 Rising</button>
+    <button class="pill" role="tab" data-sort="liquidity" aria-selected="false">💧 Liquidity</button>
+  </nav>
+
+  <section class="feed" id="feed"></section>
+  <div class="sentinel" id="sentinel"><div class="spinner" id="spinner"></div></div>
+</main>
+
+<footer class="wrap">
+  Data · DexScreener &nbsp;·&nbsp; Storage · Supabase &nbsp;·&nbsp; Not financial advice
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+/* ================================================================
+   MEME//TRACKER — frontend
+   ----------------------------------------------------------------
+   ⚠️  CONFIGURA ESTO ANTES DE DESPLEGAR
+   La anon key es PÚBLICA por diseño (protegida por RLS).
+   NUNCA pongas aquí la service_role key.
+   ================================================================ */
+const CONFIG = {
+  SUPABASE_URL:      'https://TU-PROYECTO.supabase.co',
+  SUPABASE_ANON_KEY: 'TU_ANON_KEY',
+  PAGE_SIZE: 24
+};
+
+/* ---------------------------------------------------------------
+   Helpers
+   --------------------------------------------------------------- */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+const SUB = '₀₁₂₃₄₅₆₇₈₉';
+const sub = n => String(n).split('').map(d => SUB[+d] ?? d).join('');
+
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => (
+  { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+));
+
+function num(v){
+  if (v === null || v === undefined || v === '') return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function fmtPrice(v){
+  const n = num(v);
+  if (n === null) return '—';
+  if (n === 0) return '$0';
+  const a = Math.abs(n);
+  if (a >= 1000)   return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (a >= 1)      return '$' + n.toFixed(2);
+  if (a >= 0.01)   return '$' + n.toFixed(4);
+  if (a >= 0.0001) return '$' + n.toFixed(6);
+  const m = n.toFixed(20).match(/^0\.(0+)(\d{1,4})/);
+  if (m) return '$0.0' + sub(m[1].length) + m[2];
+  return '$' + n.toExponential(2);
+}
+
+function fmtCompact(v){
+  const n = num(v);
+  if (n === null) return '—';
+  const a = Math.abs(n);
+  if (a >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
+  if (a >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+  if (a >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'K';
+  return '$' + n.toFixed(a < 10 ? 2 : 0);
+}
+
+function fmtInt(v){
+  const n = num(v);
+  if (n === null) return '—';
+  return Math.round(n).toLocaleString('en-US');
+}
+
+function fmtPct(v){
+  const n = num(v);
+  if (n === null) return '—';
+  const d = Math.abs(n) >= 1000 ? 0 : 2;
+  return (n > 0 ? '+' : '') + n.toFixed(d) + '%';
+}
+
+const shortAddr = a => (!a || a.length < 10) ? (a || '—') : a.slice(0, 4) + '…' + a.slice(-4);
+
+/* ---------------------------------------------------------------
+   State
+   --------------------------------------------------------------- */
+const state = {
+  filter: 'trending',
+  offset: 0,
+  loading: false,
+  done: false,
+  user: null,
+  likes: new Set(),
+  watch: new Set(),
+  seen: new Set()
+};
+
+let sb = null;
+const feed     = $('#feed');
+const sentinel = $('#sentinel');
+const spinner  = $('#spinner');
+const toastEl  = $('#toast');
+
+/* ---------------------------------------------------------------
+   Toast
+   --------------------------------------------------------------- */
+let toastTimer;
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
+}
+
+/* ---------------------------------------------------------------
+   Live indicator
+   --------------------------------------------------------------- */
+function setLive(mode){
+  const el = $('#live');
+  const txt = $('#liveText');
+  if (mode === 'on'){ el.classList.remove('off'); txt.textContent = 'LIVE'; }
+  else if (mode === 'connecting'){ el.classList.remove('off'); txt.textContent = 'SYNC'; }
+  else { el.classList.add('off'); txt.textContent = 'OFFLINE'; }
+}
+
+/* ---------------------------------------------------------------
+   Supabase boot
+   --------------------------------------------------------------- */
+function initSupabase(){
+  const { SUPABASE_URL: url, SUPABASE_ANON_KEY: key } = CONFIG;
+  if (!window.supabase) return null;
+  if (!url || !key || url.includes('TU-PROYECTO') || key.includes('TU_ANON_KEY')) return null;
+  return window.supabase.createClient(url, key, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
+}
+
+async function ensureAuth(){
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user) return session.user;
+    const { data, error } = await sb.auth.signInAnonymously();
+    if (error){ console.warn('[auth]', error.message); return null; }
+    return data?.user ?? null;
+  } catch (e){
+    console.warn('[auth]', e);
+    return null;
+  }
+}
+
+async function loadUserData(){
+  state.likes.clear();
+  state.watch.clear();
+  if (!state.user) return;
+  try {
+    const [l, w] = await Promise.all([
+      sb.from('likes').select('meme_id'),
+      sb.from('watchlist').select('meme_id')
+    ]);
+    (l.data || []).forEach(r => state.likes.add(r.meme_id));
+    (w.data || []).forEach(r => state.watch.add(r.meme_id));
+  } catch (e){
+    console.warn('[user data]', e);
+  }
+}
+
+/* ---------------------------------------------------------------
+   Badge logic
+   --------------------------------------------------------------- */
+function badgeFor(m){
+  const trend = (m.trend || '').toLowerCase();
+  if (m.featured || trend === 'featured') return { key:'featured', icon:'👑', label:'Featured' };
+
+  const ageH = m.created_at ? (Date.now() - new Date(m.created_at).getTime()) / 36e5 : null;
+  const chg  = num(m.price_change_24h);
+
+  if (trend === 'rising' || (chg !== null && chg >= 20)) return { key:'rising', icon:'🔥', label:'Rising' };
+  if (trend === 'new'    || (ageH !== null && ageH <= 48)) return { key:'new', icon:'🆕', label:'New' };
+  if (trend === 'trending') return { key:'trending', icon:'⚡', label:'Trending' };
+
+  return { key:'trending', icon:'⚡', label:'Trending' };
+}
+
+/* ---------------------------------------------------------------
+   Card template
+   --------------------------------------------------------------- */
+function cardHTML(m){
+  const badge = badgeFor(m);
+  const chg = num(m.price_change_24h);
+  const chgCls = chg === null ? 'flat' : chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat';
+
+  const buys  = num(m.buys_24h);
+  const sells = num(m.sells_24h);
+  let txns = num(m.txns_24h);
+  if (txns === null && (buys !== null || sells !== null)) txns = (buys || 0) + (sells || 0);
+
+  const pair   = m.pair_address || '';
+  const dexUrl = m.url || (pair ? `https://dexscreener.com/${m.chain || 'solana'}/${pair}` : '#');
+  const liked  = state.likes.has(m.id) ? ' on' : '';
+  const watched = state.watch.has(m.id) ? ' on' : '';
+
+  const img = m.image_url
+    ? `<img class="card__img" src="${esc(m.image_url)}" alt="" loading="lazy" decoding="async"
+            referrerpolicy="no-referrer" onerror="this.remove()">`
+    : '';
+
+  return `
+    ${img}
+    <div class="card__scrim"></div>
+
+    <div class="card__top">
+      <span class="badge badge--${badge.key}">${badge.icon} ${badge.label}</span>
+      <span class="chip">${esc((m.chain || '—').toUpperCase())}</span>
+    </div>
+
+    <div class="card__body">
+      <div class="card__title">
+        <h3 class="card__name" title="${esc(m.name || '')}">${esc(m.name || 'Unknown')}</h3>
+        <span class="card__ticker">$${esc(m.symbol || '—')}</span>
+      </div>
+
+      <div class="card__price">
+        <span class="price" data-f="price">${fmtPrice(m.price_usd)}</span>
+        <span class="chg ${chgCls}" data-f="chg">${fmtPct(chg)}</span>
+      </div>
+
+      <div class="card__stats">
+        <div class="stat">
+          <div class="stat__k">Volume 24H</div>
+          <div class="stat__v" data-f="vol">${fmtCompact(m.volume_24h)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat__k">Market Cap</div>
+          <div class="stat__v" data-f="mcap">${fmtCompact(m.market_cap ?? m.fdv)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat__k">Liquidity</div>
+          <div class="stat__v" data-f="liq">${fmtCompact(m.liquidity_usd)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat__k">Transactions</div>
+          <div class="stat__v" data-f="txns">${fmtInt(txns)}</div>
+        </div>
+      </div>
+
+      <div class="card__meta">
+        <span>${esc((m.chain || '—').toUpperCase())} · ${esc((m.dex_id || '—').toUpperCase())}</span>
+        <button class="pair" data-act="copy" data-pair="${esc(pair)}" title="Copy pair address">
+          ${esc(shortAddr(pair))}
+        </button>
+      </div>
+
+      <div class="card__actions">
+        <button class="act act--like${liked}"  data-act="like"  aria-pressed="${liked ? 'true' : 'false'}">♡ Like</button>
+        <button class="act act--watch${watched}" data-act="watch" aria-pressed="${watched ? 'true' : 'false'}">◇ Watchlist</button>
+        <a class="act" href="${esc(dexUrl)}" target="_blank" rel="noopener noreferrer">↗ DexScreener</a>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------------------------------------------------------------
+   Rendering
+   --------------------------------------------------------------- */
+function renderSkeletons(n = 6){
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < n; i++){
+    const d = document.createElement('div');
+    d.className = 'sk';
+    d.dataset.skeleton = '1';
+    frag.appendChild(d);
+  }
+  feed.appendChild(frag);
+}
+const clearSkeletons = () => $$('[data-skeleton]', feed).forEach(e => e.remove());
+
+function renderState(kind, detail){
+  const div = document.createElement('div');
+  div.className = 'state';
+  if (kind === 'setup'){
+    div.innerHTML = `
+      <strong>Falta configurar Supabase</strong>
+      Abre <code>index.html</code> y rellena <code>CONFIG.SUPABASE_URL</code> y
+      <code>CONFIG.SUPABASE_ANON_KEY</code> con los datos de tu proyecto.
+    `;
+  } else if (kind === 'empty'){
+    div.innerHTML = `<strong>Nada por aquí todavía</strong>No hay memes activos para este filtro.`;
+  } else {
+    div.innerHTML = `
+      <strong>No se pudo cargar el feed</strong>
+      ${esc(detail || 'Error desconocido')}
+    `;
+  }
+  feed.appendChild(div);
+}
+
+function appendCards(rows){
+  const frag = document.createDocumentFragment();
+  let added = 0;
+  for (const m of rows){
+    if (!m?.id || state.seen.has(m.id)) continue;
+    state.seen.add(m.id);
+    const el = document.createElement('article');
+    el.className = 'card';
+    el.dataset.id = m.id;
+    el.innerHTML = cardHTML(m);
+    frag.appendChild(el);
+    added++;
+  }
+  feed.appendChild(frag);
+  return added;
+}
+
+function refreshActionStates(){
+  $$('.card', feed).forEach(card => {
+    const id = card.dataset.id;
+    const like  = $('[data-act="like"]', card);
+    const watch = $('[data-act="watch"]', card);
+    if (like){
+      const on = state.likes.has(id);
+      like.classList.toggle('on', on);
+      like.setAttribute('aria-pressed', String(on));
+    }
+    if (watch){
+      const on = state.watch.has(id);
+      watch.classList.toggle('on', on);
+      watch.setAttribute('aria-pressed', String(on));
+    }
+  });
+}
+
+/* ---------------------------------------------------------------
+   Feed loading
+   --------------------------------------------------------------- */
+async function fetchPage(){
+  const { data, error } = await sb.rpc('get_meme_feed', {
+    p_sort:   state.filter,
+    p_limit:  CONFIG.PAGE_SIZE,
+    p_offset: state.offset
+  });
+  if (error) throw new Error(error.message);
+  return Array.isArray(data) ? data : [];
+}
+
+async function loadMore(isFirst = false){
+  if (!sb || state.loading || state.done) return;
+  state.loading = true;
+  if (!isFirst) spinner.classList.add('on');
+
+  try {
+    const rows = await fetchPage();
+
+    if (isFirst) clearSkeletons();
+
+    if (!rows.length){
+      state.done = true;
+      if (state.offset === 0) renderState('empty');
+      else showEnd();
+    } else {
+      appendCards(rows);
+      state.offset += rows.length;
+      if (rows.length < CONFIG.PAGE_SIZE){
+        state.done = true;
+        showEnd();
+      }
+    }
+  } catch (e){
+    console.error('[feed]', e);
+    if (isFirst){
+      clearSkeletons();
+      renderState('error', e.message);
+    } else {
+      toast('Error cargando más memes');
+    }
+  } finally {
+    state.loading = false;
+    spinner.classList.remove('on');
+  }
+}
+
+function showEnd(){
+  if ($('.end', sentinel)) return;
+  const d = document.createElement('div');
+  d.className = 'end';
+  d.textContent = '— End of feed —';
+  sentinel.appendChild(d);
+}
+
+async function resetFeed(sort){
+  if (!sb) return;
+  state.filter = sort;
+  state.offset = 0;
+  state.done = false;
+  state.loading = false;
+  state.seen.clear();
+  feed.innerHTML = '';
+  $('.end', sentinel)?.remove();
+  renderSkeletons(6);
+  await loadMore(true);
+}
+
+/* ---------------------------------------------------------------
+   Infinite scroll
+   --------------------------------------------------------------- */
+const io = new IntersectionObserver(entries => {
+  if (entries.some(e => e.isIntersecting)) loadMore(false);
+}, { rootMargin: '900px 0px' });
+io.observe(sentinel);
+
+/* ---------------------------------------------------------------
+   Actions
+   --------------------------------------------------------------- */
+async function toggleLike(btn, memeId){
+  if (!state.user){ toast('Auth no disponible'); return; }
+  const wasOn = state.likes.has(memeId);
+  const next = !wasOn;
+
+  btn.classList.toggle('on', next);
+  btn.setAttribute('aria-pressed', String(next));
+  next ? state.likes.add(memeId) : state.likes.delete(memeId);
+
+  const res = next
+    ? await sb.from('likes').insert({ user_id: state.user.id, meme_id: memeId })
+    : await sb.from('likes').delete().eq('user_id', state.user.id).eq('meme_id', memeId);
+
+  if (res.error){
+    console.warn('[like]', res.error.message);
+    btn.classList.toggle('on', wasOn);
+    btn.setAttribute('aria-pressed', String(wasOn));
+    wasOn ? state.likes.add(memeId) : state.likes.delete(memeId);
+    toast('No se pudo guardar el like');
+  }
+}
+
+async function toggleWatch(btn, memeId){
+  if (!state.user){ toast('Auth no disponible'); return; }
+  const wasOn = state.watch.has(memeId);
+  const next = !wasOn;
+
+  btn.classList.toggle('on', next);
+  btn.setAttribute('aria-pressed', String(next));
+  next ? state.watch.add(memeId) : state.watch.delete(memeId);
+
+  const res = next
+    ? await sb.from('watchlist').insert({ user_id: state.user.id, meme_id: memeId })
+    : await sb.from('watchlist').delete().eq('user_id', state.user.id).eq('meme_id', memeId);
+
+  if (res.error){
+    console.warn('[watchlist]', res.error.message);
+    btn.classList.toggle('on', wasOn);
+    btn.setAttribute('aria-pressed', String(wasOn));
+    wasOn ? state.watch.add(memeId) : state.watch.delete(memeId);
+    toast('No se pudo guardar en watchlist');
+  }
+}
+
+async function copyPair(btn){
+  const p = btn.dataset.pair;
+  if (!p){ toast('Sin pair address'); return; }
+  try {
+    await navigator.clipboard.writeText(p);
+    toast('Pair address copiado');
+  } catch {
+    toast('No se pudo copiar');
+  }
+}
+
+feed.addEventListener('click', e => {
+  const btn = e.target.closest('[data-act]');
+  if (!btn) return;
+  const card = btn.closest('.card');
+  if (!card) return;
+  const id = card.dataset.id;
+
+  if (btn.dataset.act === 'like')  toggleLike(btn, id);
+  if (btn.dataset.act === 'watch') toggleWatch(btn, id);
+  if (btn.dataset.act === 'copy')  copyPair(btn);
+});
+
+/* ---------------------------------------------------------------
+   Realtime patch (opcional, degrada sin ruido)
+   --------------------------------------------------------------- */
+function patchCard(m){
+  const el = feed.querySelector(`.card[data-id="${m.id}"]`);
+  if (!el) return;
+
+  const set = (f, v) => { const n = el.querySelector(`[data-f="${f}"]`); if (n) n.textContent = v; };
+
+  set('price', fmtPrice(m.price_usd));
+  set('vol',   fmtCompact(m.volume_24h));
+  set('mcap',  fmtCompact(m.market_cap ?? m.fdv));
+  set('liq',   fmtCompact(m.liquidity_usd));
+  set('txns',  fmtInt(m.txns_24h));
+
+  const chgEl = el.querySelector('[data-f="chg"]');
+  if (chgEl){
+    const chg = num(m.price_change_24h);
+    chgEl.textContent = fmtPct(chg);
+    chgEl.className = 'chg ' + (chg === null ? 'flat' : chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat');
+  }
+}
+
+function subscribeRealtime(){
+  try {
+    sb.channel('memes-feed')
+      .on('postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'memes' },
+          payload => { if (payload?.new) patchCard(payload.new); })
+      .subscribe(status => {
+        if (status === 'SUBSCRIBED') setLive('on');
+      });
+  } catch (e){
+    console.warn('[realtime]', e);
+  }
+}
+
+/* ---------------------------------------------------------------
+   Filters
+   --------------------------------------------------------------- */
+$$('.pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.getAttribute('aria-selected') === 'true') return;
+    $$('.pill').forEach(b => b.setAttribute('aria-selected', String(b === btn)));
+    resetFeed(btn.dataset.sort);
+  });
+});
+
+/* ---------------------------------------------------------------
+   Boot
+   --------------------------------------------------------------- */
+(async function boot(){
+  sb = initSupabase();
+
+  if (!sb){
+    setLive('off');
+    renderState('setup');
+    return;
+  }
+
+  setLive('connecting');
+  clearSkeletons();
+
+  state.user = await ensureAuth();
+  await loadUserData();
+  await resetFeed('trending');
+  setLive('on');
+  subscribeRealtime();
+
+  sb.auth.onAuthStateChange(async (_event, session) => {
+    state.user = session?.user ?? null;
+    await loadUserData();
+    refreshActionStates();
+  });
+})();
+</script>
+</body>
+</html>
