@@ -603,9 +603,9 @@ async function loadUserData(){
   if (!state.user) return;
   try {
     const [l, w] = await Promise.all([
-      sb.from('likes').select('meme_id'),
-      sb.from('watchlist').select('meme_id')
-    ]);
+  sb.from('likes').select('meme_id').eq('user_id', state.user.id),
+  sb.from('watchlist').select('meme_id').eq('user_id', state.user.id)
+]);
     (l.data || []).forEach(r => state.likes.add(r.meme_id));
     (w.data || []).forEach(r => state.watch.add(r.meme_id));
   } catch (e){
