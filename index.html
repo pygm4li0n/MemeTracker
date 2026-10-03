@@ -366,10 +366,13 @@ main{padding-top:28px}
   transition:color .3s var(--ease);
   white-space:nowrap;
 }
+.price.up  {color:var(--green)}
+.price.down{color:var(--red)}
+.price.flat{color:var(--fg)}
 .price.flash{animation:flashUp .8s var(--ease)}
 .price.flashDown{animation:flashDown .8s var(--ease)}
-@keyframes flashUp{0%{color:var(--green)}100%{color:var(--fg)}}
-@keyframes flashDown{0%{color:var(--red)}100%{color:var(--fg)}}
+@keyframes flashUp{0%{text-shadow:0 0 22px rgba(63,224,129,.9)}100%{text-shadow:none}}
+@keyframes flashDown{0%{text-shadow:0 0 22px rgba(248,113,113,.9)}100%{text-shadow:none}}
 
 .chg{
   font:700 11px/1 'JetBrains Mono',monospace;
@@ -549,7 +552,7 @@ const CONFIG = {
   SUPABASE_ANON_KEY: 'sb_publishable_neiQC042cfc6Io2r8Cf6hw_WoecdytJ',
   PAGE_SIZE: 24,
   SORT: 'trending',
-  POLL_MS: 15000     // live refresh interval
+  POLL_MS: 15000
 };
 
 /* ================================================================
@@ -714,7 +717,7 @@ function cardHTML(m){
       </div>
 
       <div class="card__price">
-        <span class="price" data-f="price">${fmtPrice(m.price_usd)}</span>
+        <span class="price ${chgCls}" data-f="price">${fmtPrice(m.price_usd)}</span>
         <span class="chg ${chgCls}" data-f="chg">${fmtPct(chg)}</span>
       </div>
 
@@ -777,7 +780,7 @@ function appendCards(rows, { prepend = false, animate = false } = {}){
     const el = document.createElement('article');
     el.className = 'card' + (animate ? ' is-new' : '');
     el.dataset.id = m.id;
-    el.dataset.pair = m.pair_address || '';   // ← for the poll
+    el.dataset.pair = m.pair_address || '';
     el.innerHTML = cardHTML(m);
     frag.appendChild(el);
     count++;
@@ -881,7 +884,7 @@ caAdd.addEventListener('click', addByCA);
 caInput.addEventListener('keydown', e => { if (e.key === 'Enter') addByCA(); });
 
 /* ================================================================
-   LIVE POLL — refresh visible cards every POLL_MS
+   LIVE POLL
    ================================================================ */
 const POLL_BATCH = 30;
 let pollTimer = null;
@@ -931,15 +934,22 @@ function patchCard(m){
   const el = feed.querySelector(`.card[data-id="${m.id}"]`);
   if (!el) return;
 
+  const chg = num(m.price_change_24h);
+  const cls = chg === null ? 'flat' : chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat';
+
   const priceEl = el.querySelector('[data-f="price"]');
   if (priceEl){
     const before = priceEl.textContent;
     const after = fmtPrice(m.price_usd);
+
+    // keep the color class in sync with the current change
+    priceEl.classList.remove('up','down','flat');
+    priceEl.classList.add(cls);
+
     if (before !== after && before !== '—'){
       priceEl.textContent = after;
       priceEl.classList.remove('flash','flashDown');
       void priceEl.offsetWidth;
-      const chg = num(m.price_change_24h);
       priceEl.classList.add(chg !== null && chg < 0 ? 'flashDown' : 'flash');
     } else {
       priceEl.textContent = after;
@@ -954,9 +964,8 @@ function patchCard(m){
 
   const chgEl = el.querySelector('[data-f="chg"]');
   if (chgEl){
-    const chg = num(m.price_change_24h);
     chgEl.textContent = fmtPct(chg);
-    chgEl.className = 'chg ' + (chg === null ? 'flat' : chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat');
+    chgEl.className = 'chg ' + cls;
   }
 }
 
@@ -973,7 +982,7 @@ function subscribeRealtime(){
             const el = document.createElement('article');
             el.className = 'card is-new';
             el.dataset.id = m.id;
-            el.dataset.pair = m.pair_address || '';   // ← for the poll
+            el.dataset.pair = m.pair_address || '';
             el.innerHTML = cardHTML(m);
             feed.prepend(el);
           })
@@ -998,7 +1007,7 @@ function subscribeRealtime(){
   await loadMore(true);
   setLive('on');
   subscribeRealtime();
-  startPolling();          // ← 15s refresh
+  startPolling();
 })();
 </script>
 </body>
