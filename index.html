@@ -814,7 +814,7 @@ async function addByCA(){
   caAdd.textContent = 'Adding…';
 
   try {
-    const { data, error } = await sb.functions.invoke('add-meme', {
+    const { data, error } = await sb.functions.invoke('hyper-api', {
       body: { address: raw }
     });
     if (error) throw new Error(error.message || 'Function error');
