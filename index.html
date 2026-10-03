@@ -548,7 +548,8 @@ const CONFIG = {
   SUPABASE_URL:      'https://piexelytvvfsoeqhlokb.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_neiQC042cfc6Io2r8Cf6hw_WoecdytJ',
   PAGE_SIZE: 24,
-  SORT: 'trending'   // fixed sort — no filters
+  SORT: 'trending',
+  POLL_MS: 15000     // live refresh interval
 };
 
 /* ================================================================
@@ -776,6 +777,7 @@ function appendCards(rows, { prepend = false, animate = false } = {}){
     const el = document.createElement('article');
     el.className = 'card' + (animate ? ' is-new' : '');
     el.dataset.id = m.id;
+    el.dataset.pair = m.pair_address || '';   // ← for the poll
     el.innerHTML = cardHTML(m);
     frag.appendChild(el);
     count++;
@@ -879,6 +881,50 @@ caAdd.addEventListener('click', addByCA);
 caInput.addEventListener('keydown', e => { if (e.key === 'Enter') addByCA(); });
 
 /* ================================================================
+   LIVE POLL — refresh visible cards every POLL_MS
+   ================================================================ */
+const POLL_BATCH = 30;
+let pollTimer = null;
+let pollRunning = false;
+
+async function refreshVisible(){
+  if (pollRunning || document.hidden) return;
+  pollRunning = true;
+
+  try {
+    const pairSet = new Set();
+    $$('.card[data-pair]', feed).forEach(el => {
+      const p = el.dataset.pair;
+      if (p) pairSet.add(p);
+    });
+    const pairs = [...pairSet];
+    if (!pairs.length) return;
+
+    for (let i = 0; i < pairs.length; i += POLL_BATCH){
+      const chunk = pairs.slice(i, i + POLL_BATCH);
+      const { data, error } = await sb.functions.invoke('refresh-feed', {
+        body: { pairs: chunk }
+      });
+      if (error){ console.warn('[poll]', error.message); continue; }
+      if (!data?.ok) continue;
+      (data.memes || []).forEach(m => patchCard(m));
+    }
+  } catch (e){
+    console.warn('[poll]', e);
+  } finally {
+    pollRunning = false;
+  }
+}
+
+function startPolling(){
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(refreshVisible, CONFIG.POLL_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshVisible();
+  });
+}
+
+/* ================================================================
    REALTIME
    ================================================================ */
 function patchCard(m){
@@ -927,6 +973,7 @@ function subscribeRealtime(){
             const el = document.createElement('article');
             el.className = 'card is-new';
             el.dataset.id = m.id;
+            el.dataset.pair = m.pair_address || '';   // ← for the poll
             el.innerHTML = cardHTML(m);
             feed.prepend(el);
           })
@@ -951,6 +998,7 @@ function subscribeRealtime(){
   await loadMore(true);
   setLive('on');
   subscribeRealtime();
+  startPolling();          // ← 15s refresh
 })();
 </script>
 </body>
