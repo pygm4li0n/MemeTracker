@@ -12,20 +12,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#050506;
-  --card:#0b0b0d;
-  --line:#17171a;
-  --line-2:#232329;
-  --fg:#f4f4f5;
+  --bg:#040405;
+  --card:#0a0a0c;
+  --line:#131316;
+  --line-2:#202027;
+  --fg:#f5f5f7;
   --fg-2:#a1a1aa;
-  --muted:#6b6b75;
-  --dim:#3a3a42;
+  --muted:#71717a;
+  --dim:#3f3f46;
+
   --green:#3fe081;
-  --green-soft:rgba(63,224,129,.09);
-  --green-line:rgba(63,224,129,.38);
+  --green-2:#22c55e;
+  --green-soft:rgba(63,224,129,.1);
+  --green-line:rgba(63,224,129,.4);
   --red:#f87171;
-  --red-soft:rgba(248,113,113,.09);
-  --r:20px;
+  --red-soft:rgba(248,113,113,.1);
+
+  --r:24px;
   --ease:cubic-bezier(.2,.7,.2,1);
 }
 
@@ -41,343 +44,456 @@ body{
 button,input{font-family:inherit}
 img{display:block}
 
-/* ambient */
-.bg-glow{
+/* ============================================================
+   BACKGROUND
+   ============================================================ */
+.bg{
   position:fixed; inset:0; z-index:0; pointer-events:none;
   background:
-    radial-gradient(900px 620px at 12% -12%, rgba(63,224,129,.055), transparent 62%),
-    radial-gradient(700px 520px at 102% -4%, rgba(255,255,255,.028), transparent 62%),
-    radial-gradient(900px 700px at 50% 118%, rgba(63,224,129,.028), transparent 65%);
+    radial-gradient(1200px 800px at 15% -20%, rgba(63,224,129,.07), transparent 60%),
+    radial-gradient(900px 700px at 110% 10%, rgba(120,120,255,.035), transparent 60%),
+    radial-gradient(1000px 800px at 50% 120%, rgba(63,224,129,.035), transparent 65%);
 }
 .grain{
-  position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.035; mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  opacity:.03; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
-.wrap{width:100%; max-width:1400px; margin:0 auto; padding:0 16px; position:relative; z-index:1}
+.wrap{
+  width:100%; max-width:1400px;
+  margin:0 auto; padding:0 20px;
+  position:relative; z-index:1;
+}
 
-/* header */
+/* ============================================================
+   HEADER
+   ============================================================ */
 .header{
   position:sticky; top:0; z-index:60;
   border-bottom:1px solid var(--line);
-  background:linear-gradient(180deg, rgba(5,5,6,.94), rgba(5,5,6,.76));
-  -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+  background:linear-gradient(180deg, rgba(4,4,5,.95), rgba(4,4,5,.75));
+  -webkit-backdrop-filter:blur(20px) saturate(140%);
+  backdrop-filter:blur(20px) saturate(140%);
 }
-.header__inner{height:56px; display:flex; align-items:center; justify-content:space-between; gap:16px}
-.brand{
-  font:900 13px/1 'Inter',sans-serif; letter-spacing:-.015em;
-  color:var(--fg); text-decoration:none;
-  display:inline-flex; align-items:center;
+.header__inner{
+  min-height:68px;
+  display:flex; align-items:center; gap:20px;
+  padding:14px 0;
 }
-.brand span{color:var(--green); margin:0 1px; font-weight:900}
-.live{
-  display:inline-flex; align-items:center; gap:6px;
-  font:700 9px/1 'JetBrains Mono',monospace;
-  letter-spacing:.16em; color:var(--muted);
-}
-.live .dot{width:5px; height:5px; border-radius:50%; background:var(--green); animation:pulse 2.4s infinite}
-.live.off .dot{background:var(--dim); animation:none; box-shadow:none}
-@keyframes pulse{
-  0%{box-shadow:0 0 0 0 rgba(63,224,129,.55)}
-  70%{box-shadow:0 0 0 6px rgba(63,224,129,0)}
-  100%{box-shadow:0 0 0 0 rgba(63,224,129,0)}
+@media (max-width:760px){
+  .header__inner{flex-wrap:wrap; gap:12px}
 }
 
-/* add bar */
-.addbar{
-  display:flex; gap:8px; align-items:center;
-  padding:14px 0 4px;
+.brand{
+  font:900 15px/1 'Inter',sans-serif;
+  letter-spacing:-.02em;
+  color:var(--fg);
+  text-decoration:none;
+  display:inline-flex; align-items:center;
+  flex:0 0 auto;
 }
-.addbar__field{
-  flex:1 1 auto; min-width:0;
-  position:relative;
-}
-.addbar__icon{
-  position:absolute; left:12px; top:50%; transform:translateY(-50%);
-  font:700 12px/1 'JetBrains Mono',monospace; color:var(--dim); pointer-events:none;
-}
-.addbar input{
-  width:100%; height:40px;
-  padding:0 12px 0 28px;
-  border-radius:12px;
+.brand span{color:var(--green); margin:0 1px; font-weight:900}
+
+/* command bar */
+.cmd{
+  flex:1 1 300px;
+  min-width:0;
+  display:flex; align-items:center; gap:8px;
+  height:42px;
+  padding:0 6px 0 14px;
+  border-radius:14px;
   border:1px solid var(--line-2);
   background:rgba(255,255,255,.02);
-  color:var(--fg);
-  font:500 12px/1 'JetBrains Mono',monospace;
-  letter-spacing:-.01em;
-  outline:none;
-  transition:border-color .18s var(--ease), background .18s var(--ease), box-shadow .18s var(--ease);
+  transition:border-color .2s var(--ease), background .2s var(--ease), box-shadow .2s var(--ease);
 }
-.addbar input::placeholder{color:var(--dim)}
-.addbar input:focus{
+.cmd:focus-within{
   border-color:var(--green-line);
   background:rgba(63,224,129,.035);
-  box-shadow:0 0 0 3px rgba(63,224,129,.06);
+  box-shadow:0 0 0 4px rgba(63,224,129,.06);
 }
-.addbar button{
+.cmd__prompt{
   flex:0 0 auto;
-  height:40px; padding:0 18px;
-  border-radius:12px;
+  font:700 12px/1 'JetBrains Mono',monospace;
+  color:var(--green);
+  opacity:.7;
+  user-select:none;
+}
+.cmd input{
+  flex:1 1 auto;
+  min-width:0;
+  height:100%;
+  border:0; outline:0; background:transparent;
+  color:var(--fg);
+  font:500 12.5px/1 'JetBrains Mono',monospace;
+  letter-spacing:-.005em;
+}
+.cmd input::placeholder{color:var(--dim)}
+.cmd button{
+  flex:0 0 auto;
+  height:32px;
+  padding:0 14px;
+  border-radius:10px;
   border:1px solid var(--green-line);
   background:var(--green-soft);
   color:var(--green);
-  font:700 11px/1 'Inter',sans-serif;
-  letter-spacing:.06em; text-transform:uppercase;
+  font:700 10.5px/1 'Inter',sans-serif;
+  letter-spacing:.1em; text-transform:uppercase;
   cursor:pointer;
   transition:background .18s var(--ease), color .18s var(--ease), box-shadow .18s var(--ease), opacity .18s var(--ease);
 }
-.addbar button:hover:not(:disabled){
-  background:rgba(63,224,129,.16);
-  box-shadow:0 10px 30px -14px rgba(63,224,129,.7);
+.cmd button:hover:not(:disabled){
+  background:rgba(63,224,129,.18);
+  box-shadow:0 8px 24px -12px rgba(63,224,129,.7);
 }
-.addbar button:disabled{opacity:.45; cursor:not-allowed}
+.cmd button:disabled{opacity:.4; cursor:not-allowed}
 
-/* filters */
-.filters{
-  display:flex; gap:6px; overflow-x:auto;
-  padding:12px 0 16px;
-  scrollbar-width:none; -ms-overflow-style:none;
-}
-.filters::-webkit-scrollbar{display:none}
-.pill{
+/* live */
+.live{
   flex:0 0 auto;
-  display:inline-flex; align-items:center; gap:6px;
-  padding:8px 12px;
+  display:inline-flex; align-items:center; gap:7px;
+  padding:8px 11px;
   border-radius:999px;
   border:1px solid var(--line-2);
   background:rgba(255,255,255,.02);
-  color:var(--fg-2);
-  font:600 11.5px/1 'Inter',sans-serif;
-  white-space:nowrap; cursor:pointer;
-  transition:color .18s var(--ease), background .18s var(--ease),
-             border-color .18s var(--ease), box-shadow .18s var(--ease);
-  -webkit-tap-highlight-color:transparent;
+  font:700 9.5px/1 'JetBrains Mono',monospace;
+  letter-spacing:.18em; color:var(--muted);
 }
-.pill:hover{color:var(--fg); border-color:#2e2e35; background:rgba(255,255,255,.045)}
-.pill[aria-selected="true"]{
-  color:var(--green);
-  border-color:var(--green-line);
-  background:var(--green-soft);
-  box-shadow:0 6px 20px -12px rgba(63,224,129,.7);
+.live .dot{
+  width:6px; height:6px; border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px rgba(63,224,129,.8);
+  animation:pulse 2.4s infinite;
+}
+.live.off{color:var(--dim)}
+.live.off .dot{background:var(--dim); animation:none; box-shadow:none}
+.live.off .dot::before{display:none}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(63,224,129,.55)}
+  70%{box-shadow:0 0 0 8px rgba(63,224,129,0)}
+  100%{box-shadow:0 0 0 0 rgba(63,224,129,0)}
 }
 
-/* feed */
-.feed{display:grid; grid-template-columns:1fr; gap:14px}
-@media (min-width:640px){.feed{grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px}}
-@media (min-width:1024px){.feed{grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px}}
+/* ============================================================
+   FEED
+   ============================================================ */
+main{padding-top:28px}
 
-/* card */
+.feed{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:20px;
+}
+@media (min-width:640px){
+  .feed{grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px}
+}
+@media (min-width:1180px){
+  .feed{grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px}
+}
+
+/* ============================================================
+   CARD
+   ============================================================ */
 .card{
-  position:relative; aspect-ratio:1/1;
+  position:relative;
+  aspect-ratio:1/1;
   border-radius:var(--r);
   overflow:hidden;
   background:var(--card);
   border:1px solid var(--line);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    0 24px 60px -46px rgba(0,0,0,.95);
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 30px 70px -50px rgba(0,0,0,.95);
   isolation:isolate;
-  transition:transform .35s var(--ease), border-color .35s var(--ease), box-shadow .35s var(--ease);
+  transition:
+    transform .4s var(--ease),
+    border-color .4s var(--ease),
+    box-shadow .4s var(--ease);
 }
 @media (hover:hover){
   .card:hover{
-    transform:translateY(-3px);
-    border-color:rgba(63,224,129,.22);
+    transform:translateY(-4px);
+    border-color:rgba(63,224,129,.28);
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.05),
-      0 30px 70px -46px rgba(0,0,0,.95),
-      0 0 40px -18px rgba(63,224,129,.28);
+      inset 0 1px 0 rgba(255,255,255,.06),
+      0 40px 90px -50px rgba(0,0,0,.95),
+      0 0 60px -20px rgba(63,224,129,.3);
   }
-  .card:hover .card__img{transform:scale(1.06)}
+  .card:hover .card__img{transform:scale(1.07)}
+  .card:hover .card__dex{
+    border-color:rgba(63,224,129,.4);
+    background:rgba(63,224,129,.14);
+    color:var(--green);
+  }
 }
-.card.is-new{animation:cardIn .6s var(--ease) both}
+.card.is-new{animation:cardIn .7s var(--ease) both}
 @keyframes cardIn{
-  from{opacity:0; transform:translateY(14px) scale(.98)}
+  from{opacity:0; transform:translateY(18px) scale(.97)}
   to{opacity:1; transform:none}
 }
 
 .card__img{
   position:absolute; inset:0; z-index:0;
   width:100%; height:100%;
-  object-fit:cover; background:#0e0e10;
-  transform:scale(1.01);
-  transition:transform .6s var(--ease);
+  object-fit:cover;
+  background:#0c0c0e;
+  transform:scale(1.02);
+  transition:transform .8s var(--ease);
 }
+
 .card__scrim{
   position:absolute; inset:0; z-index:1; pointer-events:none;
   background:linear-gradient(180deg,
-    rgba(5,5,6,.72) 0%,
-    rgba(5,5,6,.16) 24%,
-    rgba(5,5,6,0) 38%,
-    rgba(5,5,6,.42) 60%,
-    rgba(5,5,6,.9) 80%,
-    rgba(5,5,6,.98) 100%);
+    rgba(4,4,5,.72) 0%,
+    rgba(4,4,5,.14) 22%,
+    rgba(4,4,5,0) 38%,
+    rgba(4,4,5,.35) 58%,
+    rgba(4,4,5,.82) 78%,
+    rgba(4,4,5,.97) 100%);
 }
+.card__scrim::after{
+  content:'';
+  position:absolute; inset:0;
+  background:radial-gradient(120% 60% at 50% 100%, rgba(63,224,129,.08), transparent 55%);
+  opacity:0;
+  transition:opacity .4s var(--ease);
+}
+@media (hover:hover){.card:hover .card__scrim::after{opacity:1}}
+
+/* top row */
 .card__top{
-  position:absolute; top:10px; left:10px; right:10px; z-index:2;
-  display:flex; align-items:flex-start; justify-content:space-between; gap:6px;
+  position:absolute; top:14px; left:14px; right:14px; z-index:2;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:8px;
 }
+
 .badge{
-  display:inline-flex; align-items:center; gap:5px;
-  padding:5px 8px; border-radius:999px;
-  font:800 9px/1 'Inter',sans-serif;
-  letter-spacing:.09em; text-transform:uppercase;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 11px;
+  border-radius:999px;
+  font:800 10px/1 'Inter',sans-serif;
+  letter-spacing:.14em; text-transform:uppercase;
   color:#fff;
-  background:rgba(5,5,6,.62);
-  border:1px solid rgba(255,255,255,.13);
-  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  background:rgba(4,4,5,.6);
+  border:1px solid rgba(255,255,255,.14);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
   position:relative; overflow:hidden;
+  flex:0 0 auto;
 }
 .badge::after{
   content:''; position:absolute; inset:0;
-  background:linear-gradient(115deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%);
-  transform:translateX(-120%);
+  background:linear-gradient(115deg, transparent 40%, rgba(255,255,255,.18) 50%, transparent 60%);
+  transform:translateX(-130%);
 }
-.badge--featured{color:#fff; border-color:rgba(255,255,255,.34); background:rgba(5,5,6,.72)}
-.badge--featured::after{animation:shine 3.6s ease-in-out infinite}
-.badge--trending{color:var(--green); border-color:var(--green-line); background:rgba(5,22,13,.62)}
-.badge--trending::after{animation:shine 3.6s ease-in-out infinite .4s}
-.badge--rising{color:var(--green); border-color:var(--green-line); background:rgba(5,22,13,.62)}
-.badge--rising::after{animation:shine 2.2s ease-in-out infinite}
-.badge--new{color:var(--fg-2); border-color:rgba(255,255,255,.2)}
-@keyframes shine{0%,60%{transform:translateX(-120%)}80%,100%{transform:translateX(120%)}}
-
-.chip{
-  flex:0 0 auto;
-  padding:5px 7px; border-radius:999px;
-  font:700 8px/1 'JetBrains Mono',monospace;
-  letter-spacing:.12em; color:var(--fg-2);
-  background:rgba(5,5,6,.62);
-  border:1px solid rgba(255,255,255,.1);
-  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+.badge--featured{
+  color:#0a0a0c;
+  background:rgba(245,245,247,.96);
+  border-color:rgba(245,245,247,.5);
 }
-
-.card__body{position:absolute; left:0; right:0; bottom:0; z-index:2; padding:11px 11px 10px}
-.card__title{display:flex; align-items:baseline; gap:6px; min-width:0}
-.card__name{
-  margin:0;
-  font:800 13.5px/1.15 'Inter',sans-serif;
-  letter-spacing:-.02em;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+.badge--featured::after{animation:shine 4s ease-in-out infinite}
+.badge--trending{
+  color:var(--green);
+  border-color:var(--green-line);
+  background:rgba(6,26,15,.72);
 }
-.card__ticker{flex:0 0 auto; font:500 9.5px/1 'JetBrains Mono',monospace; color:var(--fg-2)}
-
-.card__price{display:flex; align-items:center; gap:7px; margin-top:6px}
-.price{
-  font:700 14px/1 'JetBrains Mono',monospace;
-  letter-spacing:-.02em;
-  transition:color .35s var(--ease);
+.badge--trending::after{animation:shine 3.4s ease-in-out infinite .6s}
+.badge--rising{
+  color:#fff;
+  border-color:rgba(255,255,255,.36);
+  background:rgba(4,4,5,.72);
 }
-.price.flash{animation:flashUp .7s var(--ease)}
-.price.flashDown{animation:flashDown .7s var(--ease)}
-@keyframes flashUp{0%{color:var(--green)}100%{color:var(--fg)}}
-@keyframes flashDown{0%{color:var(--red)}100%{color:var(--fg)}}
-.chg{
-  font:700 9px/1 'JetBrains Mono',monospace;
-  padding:3px 6px; border-radius:6px; letter-spacing:-.01em;
-}
-.chg.up{color:var(--green); background:var(--green-soft)}
-.chg.down{color:var(--red); background:var(--red-soft)}
-.chg.flat{color:var(--muted); background:rgba(255,255,255,.05)}
-
-.card__stats{
-  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:8px 10px; margin-top:9px; padding-top:9px;
-  border-top:1px solid rgba(255,255,255,.07);
-}
-@media (min-width:1024px){.card__stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.stat{min-width:0}
-.stat__k{
-  font:600 7.5px/1 'Inter',sans-serif;
-  letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
-}
-.stat__v{
-  margin-top:4px;
-  font:500 9.5px/1 'JetBrains Mono',monospace;
+.badge--rising::after{animation:shine 2.6s ease-in-out infinite}
+.badge--new{
   color:var(--fg);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  border-color:rgba(255,255,255,.22);
+  background:rgba(4,4,5,.6);
 }
+@keyframes shine{0%,55%{transform:translateX(-130%)}80%,100%{transform:translateX(130%)}}
 
-.card__meta{
-  display:flex; align-items:center; justify-content:space-between; gap:8px;
-  margin-top:8px;
-  font:400 8px/1 'JetBrains Mono',monospace;
-  letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
-}
-.pair{
-  background:none; border:0; padding:0;
-  color:var(--muted); font:inherit; letter-spacing:inherit; text-transform:inherit;
-  cursor:pointer; transition:color .18s var(--ease);
-}
-.pair:hover{color:var(--fg)}
-
-.card__actions{display:flex; gap:5px; margin-top:9px}
-.act{
-  flex:1 1 0; min-width:0;
-  display:inline-flex; align-items:center; justify-content:center; gap:4px;
-  height:28px; padding:0 6px;
-  border-radius:9px;
-  border:1px solid rgba(255,255,255,.1);
-  background:rgba(255,255,255,.035);
-  color:var(--fg-2);
-  font:600 10px/1 'Inter',sans-serif;
-  text-decoration:none; white-space:nowrap; cursor:pointer;
-  transition:color .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
+/* dex icon */
+.card__dex{
+  flex:0 0 auto;
+  width:36px; height:36px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(4,4,5,.6);
+  color:var(--fg);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  text-decoration:none;
+  transition:
+    background .2s var(--ease),
+    border-color .2s var(--ease),
+    color .2s var(--ease),
+    transform .2s var(--ease);
   -webkit-tap-highlight-color:transparent;
 }
-.act:hover{color:var(--fg); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.2)}
-.act.on{color:var(--green); background:var(--green-soft); border-color:var(--green-line)}
-.act--watch.on{color:#fff; background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.34)}
+.card__dex:active{transform:scale(.94)}
+.card__dex svg{display:block; width:14px; height:14px}
 
-/* skeleton / state / sentinel */
+/* body */
+.card__body{
+  position:absolute; left:0; right:0; bottom:0; z-index:2;
+  padding:14px 16px 16px;
+}
+
+.card__title{
+  display:flex; align-items:baseline; gap:8px; min-width:0;
+  margin:0 0 8px;
+}
+.card__name{
+  margin:0;
+  font:800 18px/1.1 'Inter',sans-serif;
+  letter-spacing:-.025em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  min-width:0;
+}
+.card__ticker{
+  flex:0 0 auto;
+  font:500 11px/1 'JetBrains Mono',monospace;
+  color:var(--fg-2);
+  letter-spacing:-.005em;
+}
+
+.card__price{
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:12px;
+}
+.price{
+  font:700 22px/1 'JetBrains Mono',monospace;
+  letter-spacing:-.03em;
+  transition:color .3s var(--ease);
+  white-space:nowrap;
+}
+.price.flash{animation:flashUp .8s var(--ease)}
+.price.flashDown{animation:flashDown .8s var(--ease)}
+@keyframes flashUp{0%{color:var(--green)}100%{color:var(--fg)}}
+@keyframes flashDown{0%{color:var(--red)}100%{color:var(--fg)}}
+
+.chg{
+  font:700 11px/1 'JetBrains Mono',monospace;
+  padding:5px 8px;
+  border-radius:8px;
+  letter-spacing:-.01em;
+  white-space:nowrap;
+}
+.chg.up{color:var(--green); background:var(--green-soft); border:1px solid rgba(63,224,129,.18)}
+.chg.down{color:var(--red); background:var(--red-soft); border:1px solid rgba(248,113,113,.18)}
+.chg.flat{color:var(--muted); background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.06)}
+
+/* stats */
+.card__stats{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,255,255,.07);
+}
+.stat{min-width:0}
+.stat__k{
+  font:600 8.5px/1 'Inter',sans-serif;
+  letter-spacing:.16em; text-transform:uppercase;
+  color:var(--muted);
+}
+.stat__v{
+  margin-top:6px;
+  font:500 12px/1 'JetBrains Mono',monospace;
+  color:var(--fg);
+  letter-spacing:-.01em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* ============================================================
+   SKELETON
+   ============================================================ */
 .sk{
-  aspect-ratio:1/1; border-radius:var(--r); border:1px solid var(--line);
-  background:linear-gradient(100deg,#0a0a0c 28%,#131316 50%,#0a0a0c 72%);
-  background-size:220% 100%; animation:shimmer 1.5s linear infinite;
+  aspect-ratio:1/1;
+  border-radius:var(--r);
+  border:1px solid var(--line);
+  background:linear-gradient(100deg,#090909 30%,#111113 50%,#090909 70%);
+  background-size:220% 100%;
+  animation:shimmer 1.6s linear infinite;
 }
 @keyframes shimmer{to{background-position:-220% 0}}
 
+/* ============================================================
+   STATES
+   ============================================================ */
 .state{
-  grid-column:1/-1; padding:70px 20px; text-align:center;
-  color:var(--muted); font-size:12.5px; line-height:1.6;
+  grid-column:1/-1;
+  padding:90px 20px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
 }
 .state strong{
-  display:block; margin-bottom:8px; color:var(--fg);
-  font:800 14px/1.3 'Inter',sans-serif; letter-spacing:-.01em;
+  display:block; margin-bottom:10px;
+  color:var(--fg);
+  font:800 16px/1.3 'Inter',sans-serif;
+  letter-spacing:-.02em;
 }
 .state code{
-  display:inline-block; margin-top:10px; padding:5px 9px; border-radius:8px;
-  border:1px solid var(--line-2); background:rgba(255,255,255,.03);
-  font:500 10.5px/1.5 'JetBrains Mono',monospace; color:var(--fg-2);
+  display:inline-block;
+  margin-top:14px;
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid var(--line-2);
+  background:rgba(255,255,255,.03);
+  font:500 11px/1.5 'JetBrains Mono',monospace;
+  color:var(--fg-2);
 }
 
-.sentinel{display:flex; align-items:center; justify-content:center; min-height:60px; padding:20px 0 60px}
+/* ============================================================
+   SENTINEL
+   ============================================================ */
+.sentinel{
+  display:flex; align-items:center; justify-content:center;
+  min-height:80px;
+  padding:28px 0 80px;
+}
 .spinner{
-  width:18px; height:18px; border-radius:50%;
-  border:2px solid var(--line-2); border-top-color:var(--green);
-  opacity:0; transition:opacity .2s var(--ease);
+  width:20px; height:20px;
+  border-radius:50%;
+  border:2px solid var(--line-2);
+  border-top-color:var(--green);
+  opacity:0;
+  transition:opacity .2s var(--ease);
   animation:spin .7s linear infinite;
 }
 .spinner.on{opacity:1}
 @keyframes spin{to{transform:rotate(360deg)}}
 .end{
-  font:600 9px/1 'JetBrains Mono',monospace;
-  letter-spacing:.22em; text-transform:uppercase; color:var(--dim);
+  font:600 9.5px/1 'JetBrains Mono',monospace;
+  letter-spacing:.28em; text-transform:uppercase;
+  color:var(--dim);
 }
 
+/* ============================================================
+   FOOTER
+   ============================================================ */
 footer{
-  padding:6px 16px 52px; text-align:center;
-  font:400 9px/1.8 'JetBrains Mono',monospace;
-  letter-spacing:.12em; text-transform:uppercase; color:var(--dim);
+  padding:8px 20px 60px;
+  text-align:center;
+  font:400 9.5px/1.8 'JetBrains Mono',monospace;
+  letter-spacing:.16em; text-transform:uppercase;
+  color:var(--dim);
 }
 
+/* ============================================================
+   TOAST
+   ============================================================ */
 .toast{
-  position:fixed; left:50%; bottom:24px; z-index:200;
-  transform:translate(-50%,16px);
-  padding:10px 14px; border-radius:12px;
-  background:#101013; border:1px solid var(--line-2);
-  color:var(--fg); font:600 12px/1 'Inter',sans-serif;
-  box-shadow:0 24px 60px -30px #000;
+  position:fixed; left:50%; bottom:28px; z-index:200;
+  transform:translate(-50%,20px);
+  padding:12px 18px;
+  border-radius:14px;
+  background:#101013;
+  border:1px solid var(--line-2);
+  color:var(--fg);
+  font:600 12.5px/1 'Inter',sans-serif;
+  box-shadow:0 30px 70px -30px #000;
   opacity:0; pointer-events:none;
   transition:opacity .25s var(--ease), transform .25s var(--ease);
   max-width:calc(100vw - 32px);
@@ -388,39 +504,31 @@ footer{
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms !important; transition-duration:.001ms !important}
   .card:hover{transform:none}
-  .card:hover .card__img{transform:scale(1.01)}
+  .card:hover .card__img{transform:scale(1.02)}
 }
 </style>
 </head>
 <body>
 
-<div class="bg-glow" aria-hidden="true"></div>
+<div class="bg" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 
 <header class="header">
   <div class="wrap header__inner">
     <a class="brand" href="./">MEME<span>//</span>TRACKER</a>
+
+    <div class="cmd">
+      <span class="cmd__prompt">$</span>
+      <input id="caInput" type="text" spellcheck="false" autocomplete="off"
+             placeholder="paste solana contract address…" maxlength="60">
+      <button id="caAdd" type="button">Add</button>
+    </div>
+
     <div class="live" id="live"><span class="dot"></span><span id="liveText">LIVE</span></div>
   </div>
 </header>
 
 <main class="wrap">
-  <div class="addbar">
-    <div class="addbar__field">
-      <span class="addbar__icon">+</span>
-      <input id="caInput" type="text" spellcheck="false" autocomplete="off"
-             placeholder="Paste Solana contract address (CA)…" maxlength="60">
-    </div>
-    <button id="caAdd" type="button">Add</button>
-  </div>
-
-  <nav class="filters" role="tablist" aria-label="Feed filters">
-    <button class="pill" role="tab" data-sort="trending"  aria-selected="true">🔥 Trending</button>
-    <button class="pill" role="tab" data-sort="new"       aria-selected="false">🆕 New</button>
-    <button class="pill" role="tab" data-sort="rising"    aria-selected="false">📈 Rising</button>
-    <button class="pill" role="tab" data-sort="liquidity" aria-selected="false">💧 Liquidity</button>
-  </nav>
-
   <section class="feed" id="feed"></section>
   <div class="sentinel" id="sentinel"><div class="spinner" id="spinner"></div></div>
 </main>
@@ -433,12 +541,19 @@ footer{
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
+/* ================================================================
+   CONFIG
+   ================================================================ */
 const CONFIG = {
   SUPABASE_URL:      'https://piexelytvvfsoeqhlokb.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_neiQC042cfc6Io2r8Cf6hw_WoecdytJ',
-  PAGE_SIZE: 24
+  PAGE_SIZE: 24,
+  SORT: 'trending'   // fixed sort — no filters
 };
 
+/* ================================================================
+   HELPERS
+   ================================================================ */
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
@@ -486,16 +601,14 @@ function fmtPct(v){
   const d = Math.abs(n) >= 1000 ? 0 : 2;
   return (n > 0 ? '+' : '') + n.toFixed(d) + '%';
 }
-const shortAddr = a => (!a || a.length < 10) ? (a || '—') : a.slice(0, 4) + '…' + a.slice(-4);
 
+/* ================================================================
+   STATE
+   ================================================================ */
 const state = {
-  filter: 'trending',
   offset: 0,
   loading: false,
   done: false,
-  user: null,
-  likes: new Set(),
-  watch: new Set(),
   seen: new Set()
 };
 
@@ -507,6 +620,9 @@ const toastEl  = $('#toast');
 const caInput  = $('#caInput');
 const caAdd    = $('#caAdd');
 
+/* ================================================================
+   TOAST
+   ================================================================ */
 let toastTimer;
 function toast(msg, isErr = false){
   toastEl.textContent = msg;
@@ -516,6 +632,9 @@ function toast(msg, isErr = false){
   toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2800);
 }
 
+/* ================================================================
+   LIVE
+   ================================================================ */
 function setLive(mode){
   const el = $('#live'), txt = $('#liveText');
   if (mode === 'on'){ el.classList.remove('off'); txt.textContent = 'LIVE'; }
@@ -523,50 +642,36 @@ function setLive(mode){
   else { el.classList.add('off'); txt.textContent = 'OFFLINE'; }
 }
 
+/* ================================================================
+   SUPABASE
+   ================================================================ */
 function initSupabase(){
   const { SUPABASE_URL: url, SUPABASE_ANON_KEY: key } = CONFIG;
   if (!window.supabase) return null;
   if (!url || !key || url.includes('TU-PROYECTO') || key.includes('TU_ANON_KEY')) return null;
-  return window.supabase.createClient(url, key, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-  });
+  return window.supabase.createClient(url, key);
 }
 
-async function ensureAuth(){
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session?.user) return session.user;
-    const { data, error } = await sb.auth.signInAnonymously();
-    if (error){ console.warn('[auth]', error.message); return null; }
-    return data?.user ?? null;
-  } catch (e){ console.warn('[auth]', e); return null; }
-}
-
-async function loadUserData(){
-  state.likes.clear();
-  state.watch.clear();
-  if (!state.user) return;
-  try {
-    const [l, w] = await Promise.all([
-      sb.from('likes').select('meme_id').eq('user_id', state.user.id),
-      sb.from('watchlist').select('meme_id').eq('user_id', state.user.id)
-    ]);
-    (l.data || []).forEach(r => state.likes.add(r.meme_id));
-    (w.data || []).forEach(r => state.watch.add(r.meme_id));
-  } catch (e){ console.warn('[user data]', e); }
-}
-
+/* ================================================================
+   BADGE
+   ================================================================ */
 function badgeFor(m){
   const trend = (m.trend || '').toLowerCase();
   if (m.featured || trend === 'featured') return { key:'featured', icon:'👑', label:'Featured' };
+
   const ageH = m.created_at ? (Date.now() - new Date(m.created_at).getTime()) / 36e5 : null;
   const chg  = num(m.price_change_24h);
-  if (trend === 'rising' || (chg !== null && chg >= 20)) return { key:'rising', icon:'🔥', label:'Rising' };
-  if (trend === 'new'    || (ageH !== null && ageH <= 48)) return { key:'new', icon:'🆕', label:'New' };
-  if (trend === 'trending') return { key:'trending', icon:'⚡', label:'Trending' };
+
+  if (trend === 'rising' || (chg !== null && chg >= 20))
+    return { key:'rising', icon:'🔥', label:'Rising' };
+  if (trend === 'new' || (ageH !== null && ageH <= 48))
+    return { key:'new', icon:'🆕', label:'New' };
   return { key:'trending', icon:'⚡', label:'Trending' };
 }
 
+/* ================================================================
+   CARD
+   ================================================================ */
 function cardHTML(m){
   const badge = badgeFor(m);
   const chg = num(m.price_change_24h);
@@ -579,8 +684,6 @@ function cardHTML(m){
 
   const pair   = m.pair_address || '';
   const dexUrl = m.url || (pair ? `https://dexscreener.com/${m.chain || 'solana'}/${pair}` : '#');
-  const liked  = state.likes.has(m.id) ? ' on' : '';
-  const watched = state.watch.has(m.id) ? ' on' : '';
 
   const img = m.image_url
     ? `<img class="card__img" src="${esc(m.image_url)}" alt="" loading="lazy" decoding="async"
@@ -590,39 +693,56 @@ function cardHTML(m){
   return `
     ${img}
     <div class="card__scrim"></div>
+
     <div class="card__top">
       <span class="badge badge--${badge.key}">${badge.icon} ${badge.label}</span>
-      <span class="chip">${esc((m.chain || '—').toUpperCase())}</span>
+      <a class="card__dex" href="${esc(dexUrl)}" target="_blank" rel="noopener noreferrer"
+         aria-label="Open on DexScreener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 17 17 7"/>
+          <path d="M8 7h9v9"/>
+        </svg>
+      </a>
     </div>
+
     <div class="card__body">
       <div class="card__title">
         <h3 class="card__name" title="${esc(m.name || '')}">${esc(m.name || 'Unknown')}</h3>
         <span class="card__ticker">$${esc(m.symbol || '—')}</span>
       </div>
+
       <div class="card__price">
         <span class="price" data-f="price">${fmtPrice(m.price_usd)}</span>
         <span class="chg ${chgCls}" data-f="chg">${fmtPct(chg)}</span>
       </div>
+
       <div class="card__stats">
-        <div class="stat"><div class="stat__k">Volume 24H</div><div class="stat__v" data-f="vol">${fmtCompact(m.volume_24h)}</div></div>
-        <div class="stat"><div class="stat__k">Market Cap</div><div class="stat__v" data-f="mcap">${fmtCompact(m.market_cap ?? m.fdv)}</div></div>
-        <div class="stat"><div class="stat__k">Liquidity</div><div class="stat__v" data-f="liq">${fmtCompact(m.liquidity_usd)}</div></div>
-        <div class="stat"><div class="stat__k">Transactions</div><div class="stat__v" data-f="txns">${fmtInt(txns)}</div></div>
-      </div>
-      <div class="card__meta">
-        <span>${esc((m.chain || '—').toUpperCase())} · ${esc((m.dex_id || '—').toUpperCase())}</span>
-        <button class="pair" data-act="copy" data-pair="${esc(pair)}" title="Copy pair address">${esc(shortAddr(pair))}</button>
-      </div>
-      <div class="card__actions">
-        <button class="act act--like${liked}" data-act="like" aria-pressed="${liked ? 'true' : 'false'}">♡ Like</button>
-        <button class="act act--watch${watched}" data-act="watch" aria-pressed="${watched ? 'true' : 'false'}">◇ Watch</button>
-        <a class="act" href="${esc(dexUrl)}" target="_blank" rel="noopener noreferrer">↗ Dex</a>
+        <div class="stat">
+          <div class="stat__k">Vol</div>
+          <div class="stat__v" data-f="vol">${fmtCompact(m.volume_24h)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat__k">MCap</div>
+          <div class="stat__v" data-f="mcap">${fmtCompact(m.market_cap ?? m.fdv)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat__k">Liq</div>
+          <div class="stat__v" data-f="liq">${fmtCompact(m.liquidity_usd)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat__k">Txns</div>
+          <div class="stat__v" data-f="txns">${fmtInt(txns)}</div>
+        </div>
       </div>
     </div>
   `;
 }
 
-function renderSkeletons(n = 9){
+/* ================================================================
+   RENDER
+   ================================================================ */
+function renderSkeletons(n = 6){
   const frag = document.createDocumentFragment();
   for (let i = 0; i < n; i++){
     const d = document.createElement('div');
@@ -640,7 +760,7 @@ function renderState(kind, detail){
   if (kind === 'setup'){
     div.innerHTML = `<strong>Falta configurar Supabase</strong>Abre <code>index.html</code> y rellena <code>CONFIG.SUPABASE_URL</code> y <code>CONFIG.SUPABASE_ANON_KEY</code>.`;
   } else if (kind === 'empty'){
-    div.innerHTML = `<strong>Nada por aquí todavía</strong>No hay memes activos para este filtro.`;
+    div.innerHTML = `<strong>Nada por aquí todavía</strong>No hay memes activos. Pega una CA arriba o espera al próximo sync.`;
   } else {
     div.innerHTML = `<strong>No se pudo cargar el feed</strong>${esc(detail || 'Error desconocido')}`;
   }
@@ -649,7 +769,7 @@ function renderState(kind, detail){
 
 function appendCards(rows, { prepend = false, animate = false } = {}){
   const frag = document.createDocumentFragment();
-  const list = [];
+  let count = 0;
   for (const m of rows){
     if (!m?.id || state.seen.has(m.id)) continue;
     state.seen.add(m.id);
@@ -658,34 +778,19 @@ function appendCards(rows, { prepend = false, animate = false } = {}){
     el.dataset.id = m.id;
     el.innerHTML = cardHTML(m);
     frag.appendChild(el);
-    list.push(el);
+    count++;
   }
   if (prepend) feed.prepend(frag);
   else feed.appendChild(frag);
-  return list.length;
+  return count;
 }
 
-function refreshActionStates(){
-  $$('.card', feed).forEach(card => {
-    const id = card.dataset.id;
-    const like  = $('[data-act="like"]', card);
-    const watch = $('[data-act="watch"]', card);
-    if (like){
-      const on = state.likes.has(id);
-      like.classList.toggle('on', on);
-      like.setAttribute('aria-pressed', String(on));
-    }
-    if (watch){
-      const on = state.watch.has(id);
-      watch.classList.toggle('on', on);
-      watch.setAttribute('aria-pressed', String(on));
-    }
-  });
-}
-
+/* ================================================================
+   FEED LOADING
+   ================================================================ */
 async function fetchPage(){
   const { data, error } = await sb.rpc('get_meme_feed', {
-    p_sort:   state.filter,
+    p_sort:   CONFIG.SORT,
     p_limit:  CONFIG.PAGE_SIZE,
     p_offset: state.offset
   });
@@ -727,81 +832,17 @@ function showEnd(){
   sentinel.appendChild(d);
 }
 
-async function resetFeed(sort){
-  if (!sb) return;
-  state.filter = sort;
-  state.offset = 0;
-  state.done = false;
-  state.loading = false;
-  state.seen.clear();
-  feed.innerHTML = '';
-  $('.end', sentinel)?.remove();
-  renderSkeletons(9);
-  await loadMore(true);
-}
-
+/* ================================================================
+   INFINITE SCROLL
+   ================================================================ */
 const io = new IntersectionObserver(entries => {
   if (entries.some(e => e.isIntersecting)) loadMore(false);
 }, { rootMargin: '900px 0px' });
 io.observe(sentinel);
 
-async function toggleLike(btn, memeId){
-  if (!state.user){ toast('Auth no disponible', true); return; }
-  const wasOn = state.likes.has(memeId);
-  const next = !wasOn;
-  btn.classList.toggle('on', next);
-  btn.setAttribute('aria-pressed', String(next));
-  next ? state.likes.add(memeId) : state.likes.delete(memeId);
-  const res = next
-    ? await sb.from('likes').insert({ user_id: state.user.id, meme_id: memeId })
-    : await sb.from('likes').delete().eq('user_id', state.user.id).eq('meme_id', memeId);
-  if (res.error){
-    btn.classList.toggle('on', wasOn);
-    btn.setAttribute('aria-pressed', String(wasOn));
-    wasOn ? state.likes.add(memeId) : state.likes.delete(memeId);
-    toast('No se pudo guardar el like', true);
-  }
-}
-
-async function toggleWatch(btn, memeId){
-  if (!state.user){ toast('Auth no disponible', true); return; }
-  const wasOn = state.watch.has(memeId);
-  const next = !wasOn;
-  btn.classList.toggle('on', next);
-  btn.setAttribute('aria-pressed', String(next));
-  next ? state.watch.add(memeId) : state.watch.delete(memeId);
-  const res = next
-    ? await sb.from('watchlist').insert({ user_id: state.user.id, meme_id: memeId })
-    : await sb.from('watchlist').delete().eq('user_id', state.user.id).eq('meme_id', memeId);
-  if (res.error){
-    btn.classList.toggle('on', wasOn);
-    btn.setAttribute('aria-pressed', String(wasOn));
-    wasOn ? state.watch.add(memeId) : state.watch.delete(memeId);
-    toast('No se pudo guardar en watchlist', true);
-  }
-}
-
-async function copyPair(btn){
-  const p = btn.dataset.pair;
-  if (!p){ toast('Sin pair address', true); return; }
-  try { await navigator.clipboard.writeText(p); toast('Pair address copiado'); }
-  catch { toast('No se pudo copiar', true); }
-}
-
-feed.addEventListener('click', e => {
-  const btn = e.target.closest('[data-act]');
-  if (!btn) return;
-  const card = btn.closest('.card');
-  if (!card) return;
-  const id = card.dataset.id;
-  if (btn.dataset.act === 'like')  toggleLike(btn, id);
-  if (btn.dataset.act === 'watch') toggleWatch(btn, id);
-  if (btn.dataset.act === 'copy')  copyPair(btn);
-});
-
-/* ============================================================
-   CA add
-   ============================================================ */
+/* ================================================================
+   CA ADD
+   ================================================================ */
 const SOL_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
 async function addByCA(){
@@ -811,7 +852,7 @@ async function addByCA(){
 
   caAdd.disabled = true;
   const original = caAdd.textContent;
-  caAdd.textContent = 'Adding…';
+  caAdd.textContent = '···';
 
   try {
     const { data, error } = await sb.functions.invoke('hyper-api', {
@@ -821,11 +862,10 @@ async function addByCA(){
     if (!data?.ok) throw new Error(data?.error || 'Unknown error');
 
     const m = data.meme;
-    state.seen.delete(m.id); // in case it was already loaded
+    state.seen.delete(m.id);
     const added = appendCards([m], { prepend: true, animate: true });
     caInput.value = '';
-    if (added) toast(`Added $${m.symbol || '?'}`);
-    else toast('Ya estaba en el feed');
+    toast(added ? `Added $${m.symbol || '?'}` : 'Ya estaba en el feed');
   } catch (e){
     console.warn('[add]', e);
     toast(e.message || 'No se pudo añadir', true);
@@ -838,9 +878,9 @@ async function addByCA(){
 caAdd.addEventListener('click', addByCA);
 caInput.addEventListener('keydown', e => { if (e.key === 'Enter') addByCA(); });
 
-/* ============================================================
-   Realtime patch
-   ============================================================ */
+/* ================================================================
+   REALTIME
+   ================================================================ */
 function patchCard(m){
   const el = feed.querySelector(`.card[data-id="${m.id}"]`);
   if (!el) return;
@@ -894,31 +934,23 @@ function subscribeRealtime(){
   } catch (e){ console.warn('[realtime]', e); }
 }
 
-/* filters */
-$$('.pill').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (btn.getAttribute('aria-selected') === 'true') return;
-    $$('.pill').forEach(b => b.setAttribute('aria-selected', String(b === btn)));
-    resetFeed(btn.dataset.sort);
-  });
-});
-
-/* boot */
+/* ================================================================
+   BOOT
+   ================================================================ */
 (async function boot(){
   sb = initSupabase();
-  if (!sb){ setLive('off'); renderState('setup'); return; }
+
+  if (!sb){
+    setLive('off');
+    renderState('setup');
+    return;
+  }
+
   setLive('connecting');
-  clearSkeletons();
-  state.user = await ensureAuth();
-  await loadUserData();
-  await resetFeed('trending');
+  renderSkeletons(6);
+  await loadMore(true);
   setLive('on');
   subscribeRealtime();
-  sb.auth.onAuthStateChange(async (_event, session) => {
-    state.user = session?.user ?? null;
-    await loadUserData();
-    refreshActionStates();
-  });
 })();
 </script>
 </body>
